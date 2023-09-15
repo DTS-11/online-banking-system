@@ -107,6 +107,7 @@ def withdraw(username):
 
     if amount > balance: # type: ignore
         print("Insufficient balance. Withdrawal not possible.")
+    
     else:
         new_balance = balance - amount # type: ignore
 
@@ -143,18 +144,18 @@ def deposit(username):
     print(f"Deposit successful. \nNew balance: {new_balance}")
 
 
-def send(recipient_username):
-    sender_username = input("Enter username of the person you want to transfer: ")
+def send(sender_username):
+    reciever_username = input("Enter username of the person you want to transfer: ")
     amount = int(input("Enter amount to transfer: "))
+
+    cur.execute(f"SELECT COUNT(*) FROM BankUsers WHERE username = '{reciever_username}'")
+    reciever_result = cur.fetchone()
 
     cur.execute(f"SELECT COUNT(*) FROM BankUsers WHERE username = '{sender_username}'")
     sender_result = cur.fetchone()
 
-    cur.execute(f"SELECT COUNT(*) FROM BankUsers WHERE username = '{recipient_username}'")
-    recipient_result = cur.fetchone()
-
-    if sender_result[0] == 0 or recipient_result[0] == 0:
-        print("Invalid sender or recipient. Please check the username.")
+    if reciever_result[0] == 0 or sender_result[0] == 0:
+        print("Invalid reciever or sender. Please check the username.")
         return
 
     cur.execute(f"SELECT balance FROM BankAccount WHERE username = '{sender_username}'")
@@ -174,29 +175,29 @@ def send(recipient_username):
 
     cur.execute(f"UPDATE BankAccount SET balance = {new_sender_balance} WHERE username = '{sender_username}'")
 
-    cur.execute(f"SELECT balance FROM BankAccount WHERE username = '{recipient_username}'")
-    recipient_balance = cur.fetchone()
+    cur.execute(f"SELECT balance FROM BankAccount WHERE username = '{reciever_username}'")
+    reciever_balance = cur.fetchone()
 
-    if not recipient_balance:
-        print("Error: Unable to retrieve recipient's account balance.")
+    if not reciever_balance:
+        print("Error: Unable to retrieve reciever's account balance.")
         return
 
-    recipient_balance = recipient_balance[0]
+    reciever_balance = reciever_balance[0]
 
-    new_recipient_balance = recipient_balance + amount # type: ignore
+    new_reciever_balance = reciever_balance + amount # type: ignore
 
-    cur.execute(f"UPDATE BankAccount SET balance = {new_recipient_balance} WHERE username = '{recipient_username}'")
+    cur.execute(f"UPDATE BankAccount SET balance = {new_reciever_balance} WHERE username = '{reciever_username}'")
 
     conn.commit()
 
     print("Money sent successfully.")
-    print(f"New sender's balance: {new_sender_balance}")
-    print(f"New recipient's balance: {new_recipient_balance}")
+    print(f"Your balance: {new_sender_balance}")
+    print(f"Receiver's balance: {new_reciever_balance}")
 
 
 
-print("=============================")
-print("Welcome to Digital Bank Ltd.!")
+print("\t=============================", end='\t')
+print("Welcome to Digital Bank Ltd.!", end='\t')
 print("=============================")
 print()
 
